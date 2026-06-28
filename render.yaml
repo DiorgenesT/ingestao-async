@@ -2,6 +2,7 @@ services:
   - type: web
     name: ingestao-async-api
     runtime: docker
+    plan: free
     dockerfilePath: ./backend/Dockerfile
     dockerContext: ./backend
     startCommand: alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT
@@ -21,6 +22,7 @@ services:
   - type: worker
     name: ingestao-async-worker
     runtime: docker
+    plan: free
     dockerfilePath: ./backend/Dockerfile
     dockerContext: ./backend
     startCommand: python -m app.worker.main
