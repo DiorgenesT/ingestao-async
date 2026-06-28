@@ -21,7 +21,6 @@ services:
   - type: worker
     name: ingestao-async-worker
     runtime: docker
-    plan: free
     dockerfilePath: ./backend/Dockerfile.worker
     dockerContext: ./backend
     envVars:
