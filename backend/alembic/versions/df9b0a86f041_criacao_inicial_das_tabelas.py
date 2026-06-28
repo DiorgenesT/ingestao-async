@@ -34,7 +34,7 @@ def upgrade() -> None:
     sa.Column('usuario_id', sa.UUID(), nullable=False),
     sa.Column('tipo', sa.String(length=50), nullable=False),
     sa.Column('payload', postgresql.JSONB(astext_type=sa.Text()), nullable=False),
-    sa.Column('status', sa.Enum('PENDENTE', 'PROCESSANDO', 'CONCLUIDO', 'FALHOU', 'MORTO', name='status_job'), nullable=False),
+    sa.Column('status', sa.Enum('pendente', 'processando', 'concluido', 'falhou', 'morto', name='status_job'), nullable=False),
     sa.Column('tentativas', sa.Integer(), nullable=False),
     sa.Column('max_tentativas', sa.Integer(), nullable=False),
     sa.Column('locked_until', sa.DateTime(timezone=True), nullable=True),
