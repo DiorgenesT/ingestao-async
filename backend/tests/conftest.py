@@ -8,7 +8,7 @@ from sqlalchemy.pool import NullPool
 # pois config.py cria o objeto settings no momento do import.
 _test_db_url = os.getenv(
     "TEST_DATABASE_URL",
-    "postgresql+asyncpg://postgres:postgres@localhost:5433/ingestao_async_test",
+    "postgresql+asyncpg://postgres:postgres@localhost:5432/ingestao_async_test",
 )
 os.environ.setdefault("DATABASE_URL", _test_db_url)
 os.environ.setdefault("SECRET_KEY", "chave-de-teste-com-pelo-menos-32-caracteres-ok")
