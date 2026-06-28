@@ -20,5 +20,5 @@ def test_settings_valores_padrao() -> None:
     assert s.ACCESS_TOKEN_EXPIRE_MINUTES == 30
     assert s.REFRESH_TOKEN_EXPIRE_DAYS == 7
     assert s.JOB_MAX_TENTATIVAS == 3
-    assert s.JOB_VISIBILITY_TIMEOUT_SEGUNDOS == 300
+    assert s.JOB_VISIBILITY_TIMEOUT_SEGUNDOS == 3600
     assert s.RATE_LIMIT_POR_MINUTO == 60
