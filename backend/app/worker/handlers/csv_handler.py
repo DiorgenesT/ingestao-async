@@ -1,5 +1,8 @@
 import csv
+import os
+import time
 import uuid
+from datetime import datetime, timezone
 from typing import Any
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -16,13 +19,21 @@ class CsvHandler:
         caminho: str = mensagem.payload["caminho"]
         nome: str = mensagem.payload.get("nome", "dataset")
 
+        inicio = time.monotonic()
+        tamanho_bytes = os.path.getsize(caminho)
+
         with open(caminho, newline="", encoding="utf-8") as f:
             reader = csv.DictReader(f)
             linhas = list(reader)
 
+        tempo_segundos = round(time.monotonic() - inicio, 2)
+
         resumo: dict[str, Any] = {
             "linhas": len(linhas),
             "colunas": list(linhas[0].keys()) if linhas else [],
+            "tamanho_bytes": tamanho_bytes,
+            "tempo_processamento_segundos": tempo_segundos,
+            "processado_em": datetime.now(timezone.utc).isoformat(),
         }
 
         self._session.add(

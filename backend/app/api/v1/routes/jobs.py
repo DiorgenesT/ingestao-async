@@ -49,7 +49,7 @@ async def listar_jobs(
 ) -> ListaJobsResponse:
     items, total = await JobService(session, usuario.id).listar_jobs(limite, offset)
     return ListaJobsResponse(
-        items=[JobResponse.model_validate(j) for j in items],
+        items=[JobResponse.from_job(j) for j in items],
         total=total,
     )
 
@@ -63,4 +63,4 @@ async def buscar_job(
     job = await JobService(session, usuario.id).buscar_job(job_id)
     if job is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Job nao encontrado")
-    return JobResponse.model_validate(job)
+    return JobResponse.from_job(job)

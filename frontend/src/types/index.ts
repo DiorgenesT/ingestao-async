@@ -1,5 +1,14 @@
 export type StatusJob = "pendente" | "processando" | "concluido" | "falhou" | "morto";
 
+export interface ResumoDataset {
+  linhas: number;
+  colunas: string[];
+  tamanho_bytes: number;
+  tempo_processamento_segundos: number;
+  processado_em: string;
+  url?: string;
+}
+
 export interface Job {
   id: string;
   tipo: "url" | "csv";
@@ -8,6 +17,7 @@ export interface Job {
   erro: string | null;
   criado_em: string;
   atualizado_em: string;
+  resumo: ResumoDataset | null;
 }
 
 export interface ListaJobsResponse {

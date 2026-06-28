@@ -115,17 +115,35 @@ export function DashboardPage({ onLogout, onNovoJob }: Props) {
           {jobs.length > 0 && (
             <div className="bg-white rounded-xl border border-gray-200 divide-y divide-gray-100">
               {jobs.map((job) => (
-                <div key={job.id} className="px-4 py-3 flex items-center gap-3">
-                  <StatusBadge status={job.status} />
-                  <span className="text-xs font-mono text-gray-400 uppercase">{job.tipo}</span>
-                  <span className="text-xs text-gray-500 font-mono truncate flex-1">{job.id}</span>
-                  <span className="text-xs text-gray-400 shrink-0">
-                    {new Date(job.criado_em).toLocaleString("pt-BR")}
-                  </span>
-                  {job.erro && (
-                    <span className="text-xs text-red-500 truncate max-w-xs" title={job.erro}>
-                      {job.erro}
+                <div key={job.id} className="px-4 py-3 space-y-1.5">
+                  <div className="flex items-center gap-3">
+                    <StatusBadge status={job.status} />
+                    <span className="text-xs font-mono text-gray-400 uppercase">{job.tipo}</span>
+                    <span className="text-xs text-gray-500 font-mono truncate flex-1">{job.id}</span>
+                    <span className="text-xs text-gray-400 shrink-0">
+                      {new Date(job.criado_em).toLocaleString("pt-BR")}
                     </span>
+                  </div>
+                  {job.resumo && (
+                    <div className="flex flex-wrap gap-x-4 gap-y-1 pl-1 text-xs text-gray-500">
+                      <span>
+                        <span className="font-medium text-gray-700">{job.resumo.linhas.toLocaleString("pt-BR")}</span> linhas
+                      </span>
+                      <span>
+                        <span className="font-medium text-gray-700">{job.resumo.colunas.length}</span> colunas
+                      </span>
+                      <span>
+                        <span className="font-medium text-gray-700">{(job.resumo.tamanho_bytes / 1024).toFixed(1)}</span> KB
+                      </span>
+                      <span>
+                        <span className="font-medium text-gray-700">{job.resumo.tempo_processamento_segundos}s</span> processamento
+                      </span>
+                    </div>
+                  )}
+                  {job.erro && (
+                    <p className="text-xs text-red-500 truncate pl-1" title={job.erro}>
+                      {job.erro}
+                    </p>
                   )}
                 </div>
               ))}

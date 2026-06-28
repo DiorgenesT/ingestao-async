@@ -3,6 +3,7 @@ from pathlib import Path
 
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.core.config import settings
 from app.models.job import Job
@@ -42,6 +43,7 @@ class JobService:
         stmt = (
             select(Job)
             .where(Job.usuario_id == self._usuario_id)
+            .options(selectinload(Job.dataset))
             .order_by(Job.criado_em.desc())
             .limit(limite)
             .offset(offset)
@@ -52,7 +54,9 @@ class JobService:
         return items, total
 
     async def buscar_job(self, job_id: uuid.UUID) -> Job | None:
-        job = await self._session.get(Job, job_id)
-        if job is None or job.usuario_id != self._usuario_id:
-            return None
-        return job
+        stmt = (
+            select(Job)
+            .where(Job.id == job_id, Job.usuario_id == self._usuario_id)
+            .options(selectinload(Job.dataset))
+        )
+        return (await self._session.execute(stmt)).scalar_one_or_none()
