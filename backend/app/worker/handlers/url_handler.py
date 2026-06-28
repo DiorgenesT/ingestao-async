@@ -27,8 +27,7 @@ class UrlHandler:
         contagem_linhas = 0
         colunas: list[str] = []
 
-        async with httpx.AsyncClient(timeout=_TIMEOUT) as client:
-            async with client.stream("GET", url, follow_redirects=True) as response:
+        async with httpx.AsyncClient(timeout=_TIMEOUT) as client, client.stream("GET", url, follow_redirects=True) as response:
                 response.raise_for_status()
                 buffer = io.StringIO()
                 cabecalho_lido = False
