@@ -27,4 +27,40 @@ services:
       timeout: 5s
       retries: 5
 
-  # api e worker serao adicionados na Fase 6 (apos Dockerfile multi-stage)
+  api:
+    build:
+      context: ./backend
+      target: final
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql+asyncpg://postgres:postgres@db:5432/ingestao_async
+      SECRET_KEY: ${SECRET_KEY}
+      ENVIRONMENT: development
+    depends_on:
+      db:
+        condition: service_healthy
+    develop:
+      watch:
+        - action: sync
+          path: ./backend/app
+          target: /app/app
+
+  worker:
+    build:
+      context: ./backend
+      target: final
+    command: python -m app.worker.main
+    environment:
+      DATABASE_URL: postgresql+asyncpg://postgres:postgres@db:5432/ingestao_async
+      SECRET_KEY: ${SECRET_KEY}
+      ENVIRONMENT: development
+    depends_on:
+      db:
+        condition: service_healthy
+    develop:
+      watch:
+        - action: sync
+          path: ./backend/app
+          target: /app/app

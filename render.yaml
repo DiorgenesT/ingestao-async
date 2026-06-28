@@ -1,0 +1,40 @@
+services:
+  - type: web
+    name: ingestao-async-api
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    dockerTarget: final
+    startCommand: alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ENVIRONMENT
+        value: production
+      - key: CORS_ORIGINS
+        value: https://ingestao-async.pages.dev
+      - key: PYTHONPATH
+        value: /app
+
+  - type: worker
+    name: ingestao-async-worker
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    dockerTarget: final
+    startCommand: python -m app.worker.main
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: SECRET_KEY
+        fromService:
+          name: ingestao-async-api
+          type: web
+          envVarKey: SECRET_KEY
+      - key: ENVIRONMENT
+        value: production
+      - key: PYTHONPATH
+        value: /app

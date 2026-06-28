@@ -7,9 +7,10 @@ Isso espelha o uso real: uma sessao por request, operacoes autonomas.
 """
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import pytest
+from sqlalchemy import update
 
 from app.core.database import get_session
 from app.core.security import gerar_hash_senha
@@ -19,6 +20,20 @@ from app.queue.interface import FilaInterface, MensagemFila
 from app.queue.postgres_queue import FilaPostgres
 
 pytestmark = pytest.mark.usefixtures("banco_de_teste")
+
+
+@pytest.fixture(autouse=True, scope="module")
+async def limpar_jobs_pendentes() -> None:
+    """
+    Marca todos os jobs pendentes como morto antes dos testes deste modulo.
+    Necessario porque os testes da API deixam jobs no banco e receber() e global.
+    """
+    async with get_session() as session:
+        await session.execute(
+            update(Job)
+            .where(Job.status.in_([StatusJob.PENDENTE, StatusJob.FALHOU, StatusJob.PROCESSANDO]))
+            .values(status=StatusJob.MORTO)
+        )
 
 
 @pytest.fixture(scope="module")
@@ -119,7 +134,7 @@ async def test_receber_aplica_visibility_timeout_e_muda_status(
     assert job is not None
     assert job.status == StatusJob.PROCESSANDO
     assert job.locked_until is not None
-    assert job.locked_until > datetime.now(timezone.utc)
+    assert job.locked_until > datetime.now(UTC)
 
     # limpeza
     await _confirmar(usuario_id, target.recibo)
@@ -155,7 +170,7 @@ async def test_rejeitar_incrementa_tentativas_e_aplica_backoff(
     assert job.status == StatusJob.FALHOU
     assert job.erro == "timeout ao processar"
     assert job.locked_until is not None
-    assert job.locked_until > datetime.now(timezone.utc)
+    assert job.locked_until > datetime.now(UTC)
 
 
 @pytest.mark.asyncio
@@ -209,14 +224,13 @@ async def test_skip_locked_dois_workers_nao_pegam_o_mesmo_job(
     id2 = await _enfileirar(usuario_id, "csv", {"w": 2})
 
     # Duas sessoes abertas simultaneamente: cada uma pega um job diferente
-    async with get_session() as s1:
-        async with get_session() as s2:
-            f1 = FilaPostgres(session=s1, usuario_id=usuario_id)
-            f2 = FilaPostgres(session=s2, usuario_id=usuario_id)
-            msgs1 = await f1.receber(limite=1)
-            msgs2 = await f2.receber(limite=1)
+    async with get_session() as s1, get_session() as s2:
+        f1 = FilaPostgres(session=s1, usuario_id=usuario_id)
+        f2 = FilaPostgres(session=s2, usuario_id=usuario_id)
+        msgs1 = await f1.receber(limite=1)
+        msgs2 = await f2.receber(limite=1)
 
-            ids_recebidos = {m.id for m in msgs1} | {m.id for m in msgs2}
+        ids_recebidos = {m.id for m in msgs1} | {m.id for m in msgs2}
 
     assert id1 in ids_recebidos
     assert id2 in ids_recebidos

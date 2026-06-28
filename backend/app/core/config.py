@@ -22,8 +22,17 @@ class Settings(BaseSettings):
     JOB_VISIBILITY_TIMEOUT_SEGUNDOS: int = 300
     JOB_BACKOFF_BASE_SEGUNDOS: int = 60
 
+    WORKER_POLL_INTERVAL_SEGUNDOS: int = 5
+    WORKER_BATCH_SIZE: int = 10
+
+    CORS_ORIGINS: str = "http://localhost:5173"
+
     RATE_LIMIT_POR_MINUTO: int = 60
     UPLOAD_MAX_BYTES: int = 50 * 1024 * 1024  # 50 MB
+    UPLOAD_DIR: str = "/tmp/ingestao-async-uploads"
+
+    def cors_origins_list(self) -> list[str]:
+        return [o.strip() for o in self.CORS_ORIGINS.split(",") if o.strip()]
 
 
 @lru_cache
