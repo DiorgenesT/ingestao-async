@@ -27,37 +27,40 @@ class UrlHandler:
         contagem_linhas = 0
         colunas: list[str] = []
 
-        async with httpx.AsyncClient(timeout=_TIMEOUT) as client, client.stream("GET", url, follow_redirects=True) as response:
-                response.raise_for_status()
+        async with (
+            httpx.AsyncClient(timeout=_TIMEOUT) as client,
+            client.stream("GET", url, follow_redirects=True) as response,
+        ):
+            response.raise_for_status()
+            buffer = io.StringIO()
+            cabecalho_lido = False
+
+            async for chunk in response.aiter_text(chunk_size=65536):
+                tamanho_bytes += len(chunk.encode())
+                buffer.write(chunk)
+
+                buffer.seek(0)
+                reader = csv.reader(buffer)
+
+                if not cabecalho_lido:
+                    try:
+                        colunas = next(reader)
+                        cabecalho_lido = True
+                    except StopIteration:
+                        buffer.seek(0, 2)
+                        continue
+
+                for _ in reader:
+                    contagem_linhas += 1
+
+                # manter apenas o trecho incompleto da ultima linha
+                resto = buffer.read()
                 buffer = io.StringIO()
-                cabecalho_lido = False
-
-                async for chunk in response.aiter_text(chunk_size=65536):
-                    tamanho_bytes += len(chunk.encode())
-                    buffer.write(chunk)
-
-                    buffer.seek(0)
-                    reader = csv.reader(buffer)
-
-                    if not cabecalho_lido:
-                        try:
-                            colunas = next(reader)
-                            cabecalho_lido = True
-                        except StopIteration:
-                            buffer.seek(0, 2)
-                            continue
-
-                    for _ in reader:
-                        contagem_linhas += 1
-
-                    # manter apenas o trecho incompleto da ultima linha
-                    resto = buffer.read()
-                    buffer = io.StringIO()
-                    if not resto.endswith("\n"):
-                        ultima_quebra = resto.rfind("\n")
-                        if ultima_quebra != -1:
-                            buffer.write(resto[ultima_quebra + 1:])
-                    buffer.seek(0, 2)
+                if not resto.endswith("\n"):
+                    ultima_quebra = resto.rfind("\n")
+                    if ultima_quebra != -1:
+                        buffer.write(resto[ultima_quebra + 1 :])
+                buffer.seek(0, 2)
 
         tempo_segundos = round(time.monotonic() - inicio, 2)
 
