@@ -17,6 +17,7 @@ export interface Job {
   erro: string | null;
   criado_em: string;
   atualizado_em: string;
+  nome: string | null;
   resumo: ResumoDataset | null;
 }
 

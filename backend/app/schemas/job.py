@@ -31,6 +31,7 @@ class JobResponse(BaseModel):
     erro: str | None
     criado_em: datetime
     atualizado_em: datetime
+    nome: str | None = None
     resumo: ResumoDataset | None = None
 
     model_config = {"from_attributes": True}
@@ -40,6 +41,7 @@ class JobResponse(BaseModel):
         resumo = None
         if job.dataset is not None:
             resumo = ResumoDataset.model_validate(job.dataset.resumo)
+        nome = job.dataset.nome if job.dataset else job.payload.get("nome")
         return cls(
             id=job.id,
             tipo=job.tipo,
@@ -48,6 +50,7 @@ class JobResponse(BaseModel):
             erro=job.erro,
             criado_em=job.criado_em,
             atualizado_em=job.atualizado_em,
+            nome=nome,
             resumo=resumo,
         )
 
