@@ -12,13 +12,6 @@ class Settings(BaseSettings):
     )
 
     DATABASE_URL: str
-
-    @field_validator("DATABASE_URL", mode="before")
-    @classmethod
-    def garantir_asyncpg(cls, v: str) -> str:
-        if v.startswith("postgresql://") or v.startswith("postgres://"):
-            return v.replace("://", "+asyncpg://", 1)
-        return v
     TEST_DATABASE_URL: str = ""
     SECRET_KEY: str
     ENVIRONMENT: str = "development"
@@ -38,6 +31,13 @@ class Settings(BaseSettings):
     RATE_LIMIT_POR_MINUTO: int = 60
     UPLOAD_MAX_BYTES: int = 50 * 1024 * 1024  # 50 MB
     UPLOAD_DIR: str = "/tmp/ingestao-async-uploads"
+
+    @field_validator("DATABASE_URL", mode="before")
+    @classmethod
+    def garantir_asyncpg(cls, v: str) -> str:
+        if v.startswith("postgresql://") or v.startswith("postgres://"):
+            return v.replace("://", "+asyncpg://", 1)
+        return v
 
     def cors_origins_list(self) -> list[str]:
         return [o.strip() for o in self.CORS_ORIGINS.split(",") if o.strip()]
