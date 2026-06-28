@@ -1,5 +1,6 @@
 from functools import lru_cache
 
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -11,6 +12,13 @@ class Settings(BaseSettings):
     )
 
     DATABASE_URL: str
+
+    @field_validator("DATABASE_URL", mode="before")
+    @classmethod
+    def garantir_asyncpg(cls, v: str) -> str:
+        if v.startswith("postgresql://") or v.startswith("postgres://"):
+            return v.replace("://", "+asyncpg://", 1)
+        return v
     TEST_DATABASE_URL: str = ""
     SECRET_KEY: str
     ENVIRONMENT: str = "development"
