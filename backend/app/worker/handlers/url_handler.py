@@ -2,7 +2,7 @@ import csv
 import io
 import time
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 import httpx
@@ -38,7 +38,7 @@ class UrlHandler:
             "url": url,
             "tamanho_bytes": tamanho_bytes,
             "tempo_processamento_segundos": tempo_segundos,
-            "processado_em": datetime.now(timezone.utc).isoformat(),
+            "processado_em": datetime.now(UTC).isoformat(),
         }
 
         self._session.add(

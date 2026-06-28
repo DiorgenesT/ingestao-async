@@ -2,7 +2,7 @@ import csv
 import os
 import time
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -33,7 +33,7 @@ class CsvHandler:
             "colunas": list(linhas[0].keys()) if linhas else [],
             "tamanho_bytes": tamanho_bytes,
             "tempo_processamento_segundos": tempo_segundos,
-            "processado_em": datetime.now(timezone.utc).isoformat(),
+            "processado_em": datetime.now(UTC).isoformat(),
         }
 
         self._session.add(
