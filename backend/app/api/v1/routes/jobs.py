@@ -64,3 +64,14 @@ async def buscar_job(
     if job is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Job nao encontrado")
     return JobResponse.from_job(job)
+
+
+@router.delete("/{job_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def deletar_job(
+    job_id: uuid.UUID,
+    session: AsyncSession = Depends(get_session_dep),
+    usuario: Usuario = Depends(usuario_atual),
+) -> None:
+    deletado = await JobService(session, usuario.id).deletar_job(job_id)
+    if not deletado:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Job nao encontrado")

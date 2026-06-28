@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { BarChart } from "../components/BarChart";
 import { StatusBadge } from "../components/StatusBadge";
-import { listarJobs, logout } from "../services/api";
+import { deletarJob, listarJobs, logout } from "../services/api";
 import type { Job, StatusJob } from "../types";
 
 interface Props {
@@ -41,6 +41,11 @@ export function DashboardPage({ onLogout, onNovoJob }: Props) {
     const intervalo = setInterval(() => { void carregar(); }, 5000);
     return () => clearInterval(intervalo);
   }, [carregar]);
+
+  async function handleDeletar(id: string) {
+    await deletarJob(id);
+    void carregar();
+  }
 
   function handleLogout() {
     logout();
@@ -123,6 +128,13 @@ export function DashboardPage({ onLogout, onNovoJob }: Props) {
                     <span className="text-xs text-gray-400 shrink-0">
                       {new Date(job.criado_em).toLocaleString("pt-BR")}
                     </span>
+                    <button
+                      onClick={() => { void handleDeletar(job.id); }}
+                      className="text-xs text-red-400 hover:text-red-600 focus:outline-none shrink-0"
+                      aria-label="Excluir job"
+                    >
+                      Excluir
+                    </button>
                   </div>
                   {job.resumo && (
                     <div className="flex flex-wrap gap-x-4 gap-y-1 pl-1 text-xs text-gray-500">

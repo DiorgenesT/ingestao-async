@@ -61,6 +61,18 @@ export async function buscarJob(id: string): Promise<Job> {
   return request<Job>(`/api/v1/jobs/${id}`);
 }
 
+export async function deletarJob(id: string): Promise<void> {
+  const token = getToken();
+  const resp = await fetch(`${BASE_URL}/api/v1/jobs/${id}`, {
+    method: "DELETE",
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+  if (!resp.ok && resp.status !== 204) {
+    const body = await resp.json().catch(() => ({})) as Record<string, unknown>;
+    throw new Error(String(body["detail"] ?? resp.statusText));
+  }
+}
+
 export async function submeterUrl(url: string, nome: string): Promise<JobSubmitResponse> {
   return request<JobSubmitResponse>("/api/v1/jobs/url", {
     method: "POST",

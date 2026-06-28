@@ -53,6 +53,14 @@ class JobService:
         total: int = (await self._session.execute(count_stmt)).scalar() or 0
         return items, total
 
+    async def deletar_job(self, job_id: uuid.UUID) -> bool:
+        stmt = select(Job).where(Job.id == job_id, Job.usuario_id == self._usuario_id)
+        job = (await self._session.execute(stmt)).scalar_one_or_none()
+        if job is None:
+            return False
+        await self._session.delete(job)
+        return True
+
     async def buscar_job(self, job_id: uuid.UUID) -> Job | None:
         stmt = (
             select(Job)
