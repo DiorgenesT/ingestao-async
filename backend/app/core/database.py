@@ -14,7 +14,7 @@ engine = create_async_engine(
     settings.DATABASE_URL,
     poolclass=NullPool,
     echo=settings.ENVIRONMENT == "development",
-    connect_args={"prepared_statement_cache_size": 0},
+    connect_args={"statement_cache_size": 0},
 )
 
 SessionLocal = async_sessionmaker(
